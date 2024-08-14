@@ -1,0 +1,39 @@
+integrations:
+ - name: readContactsAndLeads # name this anything you'd like
+   displayName: Read Contacts and Leads
+   provider: salesforce
+   read:
+    objects:
+      - objectName: contact
+        destination: contactWebhook
+        schedule: "*/30 * * * *" # every 30 minutes
+        # Always read these fields
+        requiredFields:
+          - fieldName: firstName
+          - fieldName: lastName
+          - fieldName: email
+        # Customer can decide during set-up if they want us to read these fields
+        optionalFields:
+          - fieldName: salutation
+      - objectName: leads
+        destination: leadsWebhook
+        schedule: "*/30 * * * *" # every 30 minutes
+        requiredFields:
+          - fieldName: firstName
+          - fieldName: lastName
+          - fieldName: email
+          - fieldName: isConverted
+          # Allow the customer to pick a standard or optional field to map to priority score
+          - mapToName: priority
+            mapToDisplayName: Priority Score
+            prompt: Which field do you use to track the priority of a lead?
+        # All other fields in a Lead are optional, and customers can pick during set up
+        optionalFieldsAuto: all
+ - name: createLeads
+   displayName: Create Leads
+   provider: salesforce
+   actions:
+    - type: write
+      objects:
+        # Create a new lead in Salesforce whenever we make an API request.
+        - objectName: lead
